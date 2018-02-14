@@ -103,3 +103,13 @@ shutdown -h +10 -> shutdown in 10 minutes
 shutdown -h +10 "shutting down in 10" -> displays message and halts in 10 min
 shutdown -c -> cancel shutdown operation
 echo "message" | wall -> displays the message to all the users
+
+========================================
+Hard disk layout
+----------
+- no drive letter, Linux uses mount points
+/ -> root file system
+swapon -s -> display info on the swap
+free -m -> display info on the RAM and swap usage - reads info from /proc/meminfo
+df -hT -> display file system disk usage
+
