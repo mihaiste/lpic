@@ -34,7 +34,7 @@ Hardware device drivers
 lsmod -> list currently loaded drivers - reads from /proc/modules
 modprobe -r *driver* -> unload the driver and its dependencies
 modprobe -rv -> verbose
-
+test 
 
 
 
