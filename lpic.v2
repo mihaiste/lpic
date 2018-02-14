@@ -32,27 +32,74 @@ dmesg -C -> clear the buffer for hardware changes
 Hardware device drivers
 -------------
 lsmod -> list currently loaded drivers - reads from /proc/modules
-modprobe -r *driver* -> unload the driver and its dependencies
+modprobe -r *driver* -> unload the driver and its dependencies - rmmod is used in the background
 modprobe -rv -> verbose
-test 
+modprobe *driver* -> load the driver and it dependencies - insmod is used in the background
+/sys/module/*module_name*/parameters/ -> loaded module options
+/etc/modprobe.d/modesetting.conf -> set module options to be used when loading
 
-
-
-
+==================================================
 Linux Boot Process
 -------------
-BIOS = POST -> boot loader -> OS
+boot = POST -> locate boot loader -> load boot loader -> load kernel -> start other services
 GRUB -> GRand Unified Bootloader
 /boot -> contains the kernel, initial RAM disk and other files for the boot
 vmlinux -> normal kernel
 vmlinuz -> compressed kernel
+/proc/cmdline -> parameters passed through to the kernel for the booting process
 
-runlevels:
+System and startup managers:
+SysVinit -> used in earlier Debian and RH distros - serial boot process
+Upstart -> developed by Ubuntu
+systemd -> the latest - start services in paralel
+
+top -p X -> display only the process for PID X
+
+systemd-analyze -> display the boot time
+systemd-analyze blame -> display a list of all running units ordered by the time they took to initialize
+
+Kernel Ring Buffer Messages
+---------------
+dmesg -> reads from /dev/ksmg
+dmesg -> also logs can be found in /var/log/dmesg or boot.msg
+dmesg -C -> clear the ring buffer
+dmesg -c -> display and clear the ring buffer
+dmesg -w -> follows the ring buffer - good for monitoring
+dmesg -H -> displays in human readable format
+
+================================================
+Runlevels
+--------------
+SysVinit:
 0 -> shutdown
-1 -> single user mode - used for maintenance
+1/S -> single user mode - used for maintenance
 2-5 -> multi-user modes
 6 -> reboot
-telinit X
-systemctl isolate X.target
+/etc/inittab -> set the default runlevel in this file - only for SysVinit
+/etc/rcX.d -> the default enabled/disabled services for the X runlevel
+chkconfig *service* on/off -> enable/disable the service - removes the symlink from the current runlevel directory /etc/rcX.d
+telinit X -> change the runlevel to X
+who -r = runlevel -> display the current runlevel
 
+systemd
+-------------
+poweroff.target -> runlevel 0
+rescue.target -> runlevel 1
+multiuser.target -> runleves 2,3,4
+graphical.target -> runlevel 5
+reboot.target -> runlevel 6
 
+systemctl get-default -> display the default runlevel
+systemctl set-default X -> set the default runlevel
+systemctl disable/enable X.service -> enable/disable a service
+systemctl isolate X.target -> change the runlevel to X
+who -r = runlevel
+
+shutdown/reboot
+-------------
+shutdown -h now -> halt
+shutdown -r now -> reboot
+shutdown -h +10 -> shutdown in 10 minutes
+shutdown -h +10 "shutting down in 10" -> displays message and halts in 10 min
+shutdown -c -> cancel shutdown operation
+echo "message" | wall -> displays the message to all the users
