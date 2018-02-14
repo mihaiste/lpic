@@ -1,0 +1,475 @@
+hardware
+------------
+lspci
+lsusb
+lsblk - list block devices
+------------
+/proc -> representation of running processes, what kernel we are running, what file systems we have mounted, how the kernel was started etc
+/sys -> representation of our devices
+/dev -> actual device files: block (disk), character (terminals or virtual terminals)
+------------
+lsusb -v -> verbose listing
+------------
+virtual file systems
+cat /proc/devices -> show what devices are loaded, representative drivers that are loaded
+cat /proc/cdmline -> command line arguments passed through the kernel when it has started
+------------
+usb devices
+dmesg -> cat /dev/kmsg
+------------
+kernel modules
+lsmod -> listing loaded drivers
+modprobe -r -> unload a loaded driver
+modprobe -> load a driver
+modinfo -> show info about a kernel module
+
+=====================
+
+booting the system
+------------
+/proc/cmdline -> 
+uname -r -> displays version of the kernel
+systems and startup managers: SysVinit (used in earlier version of Red Hat and Debian-based systems), Upstart (developed by Ubuntu), systemd (RHEL, CentOS, Suse and other Debian-based systems)
+systemd -> used at the moment on Ubuntu as well
+/etc/rcX.d -> folders for runlevels [0-6]
+/etc/rcX.d/S* -> services that start automatically in runlevel X
+/etc/rcX.d/K* -> services that are not started automatically in runlevel X
+------------
+systemd-analyze -> display the boot time
+systemd-analyze blame -> display the boot time for each service/device
+top -p 1 -> show the systemd service/process in top
+dmesg -> can be used for monitoring
+
+=================================
+
+runlevels in SysVinit
+------------
+runlevel 0 -> power off mode
+runlevel 1 -> single-user mode
+runlevel 2 -> main runlevel in Ubuntu/Debian - dependent on if the GUI was installed or not
+runlevel 3 -> text-only (in RH, SUSE) - /etc/inittab
+runlevel 4 -> mostly not used or user definable
+runlevel 5 -> graphical mode (in RH, SUSE) - /etc/inittab
+runlevel 6 -> reboot mode
+telinit X -> change the runlevel to X
+
+boot targets (runlevels) in systemd
+-----------
+runlevel 0 -> poweroff.target
+runlevel 1 -> rescue.target
+runlevel 2,3,4 -> multiuser.target
+runlevel 5 -> graphical.target
+runlevel 6 -> reboot.target
+
+systemctl get-default -> displays the default runlevel - no need for root
+systemctl set-default -> sets the default runlevel
+systemctl isolate *runlevel* -> changes the runlevel
+runlevel -> displays the previous and current runlevels - RH
+who -r -> displays the previous and current runlevels - RH
+
+shutdown/reboot
+-------------
+shutdown -h now -> halts the sytem
+shutdown -r now -> reboots the sytem
+shutdown -r/h +10 "reboots/halts in 10 minutes" -> reboots/halts in 10 minutes and displays a message
+shutdown -c -> cancels a pending operation
+echo "message" | wall -> displays the message to all users
+
+services
+------------
+chkconfig *service_name* on/off -> starts/stops the service
+service *service_name* start/stop -> starts/stops the service
+service *service_name* status -> displays the status of the service
+systemctl enable/disable *service_name* -> enables/disables the service
+systemctl status *service_name* -> displays information about the status
+
+================================
+
+LVM (Logical Volume Management)
+------------
+pvcreate /dev/sdc1 -> mark partition as physical volume
+vgextend vg1 /dev/sdc1 -> add the physical volume to the existing volume group
+lvextend -L +1000 /dev/vg1/data -> extend the available space to the logical volume
+resize2fs /dev/vg1/data -> resize the file system
+
+SWAP
+------------
+swapon -s -> display current swap information
+cat /proc/meminfo -> display how the memory is used on the system
+df -hT -> display information on all file systems
+
+pv + TAB
+vg + TAB
+lv + TAB
+mount -> get info on all file systems
+
+================================
+
+Bootloader
+------------
+MBR -> first 512 bytes from the disk
+MBR = 446 bytes (assembly code bootloader) + 16 bytex x N (partition tables for 4 primary partitions) + 2 bytes (bootable -> 0xAA55=bootable)
+dd if=/dev/sda of=/root/sda.mbr count=1 bs=512 -> backup the MBR
+dd if=/root/sda.mbr of=/dev/sda -> restore the MBR
+
+GRUB Legacy
+-----------
+/boot/grub/menu.lst -> the boot menu from GRUB
+
+GRUB 2
+----------
+/boot/grub/grub.cfg -> config file
+grub-mkconfig -o *file* -> create config file for GRUB
+- never make changes to the GRUB config file directly
+
+==================================
+
+Shared libraries
+-----------
+ldd /bin/ls -> display dependencies for ls
+ldd $(which *command*)
+- located in /lib or /usr/lib
+- can be read from path specified in /etc/ld.so.conf
+- can also be read from LD_LIBRARY_PATH
+ldconfig -p -> print out the library cache
+ldconfig -> rebuild the library cache
+
+==================================
+
+Debian Package Management
+------------
+dpkg -i package.deb -> install a .deb package
+dpkg -r package -> remove the package
+dpkg -P package -> purge the package (also uninstall dependencies)
+dpkg --get-selections -> display what is installed
+dpkg -l 'vim*' -> display all packages available that start with vim
+dpkg -S /usr/bin/lp -> to which package the file belongs
+dpkg -L package -> list all files belonging to a package
+dpkg-reconfigure
+
+/etc/apt/sources.list -> configured repositories
+aptitude -> wizard-like
+apt-get install *name*
+apt-get update
+apt-get purge
+apt-get autoremove -> remove dependencies after purging the package
+apt-get dist-upgrade
+apt-cache search *name*
+apt-cache show *name* -> detailed information about the package
+
+================================
+
+RH Package Manager (rpm and yum)
+--------------
+rpm -qa -> display the installed packages
+rpm -i package.rpm -> install the rpm package
+rpm -qpi package.rpm -> display information on the package
+rpm -qpl package.rpm -> list contents of the package
+rpm -U package.rpm -> update package
+rpm -F package.rpm -> freshen package
+rpm -e package -> remove package
+rpm -K package.rpm -> check the signature
+rpm -V package -> verify or check the integrity of a package
+rpm -qpR package.rpm -> show dependencies for the package
+rpm -qf /etc/hosts.allow -> list owning package
+
+/etc/yum.conf -> configuration for yum
+/etc/yum/repos.d -> configure repos
+yum install -y package -> don't ask for confirmation
+yum remove package
+yum info package
+yum search package
+yum list installed
+yum provides /etc/hosts.allow
+yum repolist
+
+yumdownloader -> download packages without installing them
+--destdir -> set destination directory
+--resolve -> also download dependencies
+rpm2cpio package.rpm > package.cpio
+
+====================================
+
+CLI
+----------
+uname -a -> display anything about the OS
+uname -o -> display OS type
+
+pwd vs /usr/bin/pwd
+
+Variable
+----------
+FRUIT=apple
+echo $FRUIT
+export FRUIT -> make variable available to all the shells
+unset FRUIT -> delete variable
+
+env
+set -o
+set +o
+alias
+
+History
+----------
+history
+!170 -> run the 170th command from the history
+!b -> run the latest command from history that starts with letter b
+!$ -> use the last used argument
+~/.bash_history
+CTRL+R -> reverse search within the history
+HISTCONTROL=erasedups -> erase duplicates from the history
+
+===================================
+
+Process Text Streams
+-----------
+cat -> top to bottom
+tac -> bottom to top
+less
+nl -> number the lines within a file
+head -n / tail -n
+tail -f -> follow log files
+tail -f /var/log/messages
+
+tabs X -> set the number of spaces for TAB to X
+cat -vet -> also display special characters, i.e. tabs
+
+head /etc/service | fmt -> format the width of the output
+head -n 57 /etc/service | pr -> format for printing with page numbers; pr default to 66 number of lines per page
+
+uniq -> remove duplicates
+join -> combines unique information from 2 files
+paste -> combine 2 files with all the information
+sort -> sort on the first character of every line
+sort -r -> reverse sort
+sort -t':' -> specify the delimiter
+sort -n -> numerical sort
+sort -k3 -> column 3
+wc -l -> number of lines
+wc -c -> number of characters
+wc -w -> number of words
+
+find /etc -maxdepth 1 -type f -exec wc -l {} \;
+
+split -l 300 /etc/mime.types
+
+tr [a-z] [A-Z] < /etc/services
+tr -s [:space:]
+
+sed 's/bash/sh' /etc/passwd
+sed '/^#/d'
+cut -f1,3 -d':' /etc/passwd
+cut -f1 -d$'\t' /etc/services
+
+====================================
+
+Streams, Pipes and Redirects
+-----------
+>/1> -> redirecting standard output
+2> -> redirecting standard errors
+>>/1>> -> append
+2>&1 -> redirecting standard errors to standard output
+tee -> redirect output to a file and to the screen
+
+===================================
+
+Create, Monitor and Kill Processes
+----------
+screen *command* -> create a new screen and run the command
+CTRL+A+D -> detach from the created screen
+screen -ls -> list the screens
+screen -r *screenID* -> reattach screen
+---------------------------------------------------------
+1st user
+---
+screen sleep 100
+CTRL+A+D
+screen -ls
+chmod u+s $(which screen)
+chmod 755 /var/run/screen
+screen -S demo
+CTRL+A
+:multiuser on
+CTRL+A
+:acladd *2nd user*
+
+2nd user
+---
+screen -x *1st user*/demo
+
+exit -> exit screen sharing
+---------------------------------------------------------
+
+nohup *command* -> the command will continue to run after logout
+ps -elf
+ps aux
+pgrep
+pkill
+killall -u *user*
+
+top
+uptime
+free
+top -p PID -> show only the process with the selected PID
+
+==============================
+
+Process Execution Priorities
+------------
+nice -> display the default niceness
+ps -l -> look for NI (niceness) column
+nice -n 10 sleep 300& -> more nice and less CPU time
+nice -n -10 sleep 300& -> less nice and more CPU time
+renice -n 15 -p PID -> raise the niceness
+default niceness = 0
+only root can lower the niceness of a process
+
+==============================
+
+Search text files using regular expressions
+-------------
+^ -> start of the string
+$ -> end of the string
+[Cc] -> range - either C or c
+[a-z] -> range from lowercase a to lowercase z
+[a-z_] -> from a to z or underscore
+[A-Z]
+[0-9]
+[:lower:]
+[:upper:]
+\s -> whitespace
+\S -> non-whitespace
+\b -> word boundary
+\B -> non word boundary
+X* -> zero or more X characters
+X? -> zero or one occurence of X
+X+ -> one or more occurences of X
+X{3} -> exactly 3 occurence of X
+
+================================
+
+VIM
+-----------
+h,j,k,l -> navigation
+/text -> search forwards
+?text -> search backwards
+n -> next item from the search
+Shift+n -> previous item from the search
+i -> insert before the current character
+a -> insert after the current character
+I -> insert at the start of the line
+A -> insert at the end of the line
+o -> insert new line after the current line
+dw -> delete the current word
+3ds -> delete 3 words starting from the current one
+d0 -> deletes up to the start of the line
+d$ -> deletes up to the end of the line
+dG -> delete everything from the current position to the end of the document
+dd -> delete the current line
+
+yw -> copy current word
+yy -> copy current line
+
+cw -> clear the current word - delete the current word and enter in insert mode
+p -> paste after current position
+P -> paste before current position
+u -> undo changes
+
+0 -> navigate to the beginning of the line
+
+:e -> reverts to last saved version
+:x -> save and exit
+ZZ -> save and exit
+
+====================================
+
+Create partitions and file systems
+--------------
+fdisk -> works only with MBR
+parted -> works with GPT and MBR
+gdisk -> works with GPT
+
+fdisk /dev/sdX
+
+fdisk -l /dev/sdX -> check if there are created partitions
+
+XFS -> default file system in RHEL/CentOS 7
+
+mkfs -t ext4 /dev/sdX1
+mkfs.ext4 /dev/sdX1
+mke2fs -t ext4 /dev/sdX1
+mkswap /dev/sdX3
+
+===================================
+
+Maintain integrity of file systems
+-----------
+fsck /dev/sdX1 -> check the named partition
+fsck -A -> check all file systems
+fsck -R -> exclude root file system for checking
+fsck -ARM -> exclude all mounted file systems
+fsck -f /dev/sdX1 -> force a check for a partition if it was marked as clean
+- always unmount before repair
+
+df -h -> display available space
+df -i -> display available inodes
+tune2fs -l /dev/sdX1 -> display information on a file system
+dumpe2fs /dev/sdX1 -> display information about the superblocks
+xfs_info /dev/sdX1 -> display information about XFS file system
+
+====================================
+
+Mounting/unmounting
+------------
+mount -o rw,noatime /dev/sdX1 /data
+noatime -> don't keep the access time
+blkid /dev/sdX1 -> display the UUID
+
+========================================
+
+Disk quotas
+-------------
+apt-get install quota
+yum install quota
+
+====================================
+
+File permissions and ownership
+-------------
+umask xxx -> set default permissions by removing them
+newgrp *group* -> switch the group
+stat *file* -> view file properties
+stat -c %A -> show symbolic permissions
+stat -c %a -> show numeric permissions
+stat -c %G -> show GID name
+stat -c %g -> show GID number
+chgrp -> change group ownership
+chown -> change user ownership
+chmod o+t *folder* -> set sticky bit - allows to only delete files that are owned by your used
+chmod 1777 *folder* -> set sticky bit
+chmod g+s *folder* -> set GID bit - all new files are going to be group owner by the owner of the directory
+chmod g+s *executable* -> the file runs with the GID of the group owner of the file
+chmod 2777 *folder* -> set GID bit
+chmod u+s *executable* -> set the UID bit - the file runs with the UID of the user that owns the file
+chmod 4755 *executable* -> set the UID bit
+
+===========================================
+
+Symbolic and hard links
+--------------
+ls -ld -> show hard link count
+ls -li -> show inode number
+
+===========================================
+
+System files
+--------------
+/usr -> Unix System Resource - documentation and programs
+/opt ->
+
+find
+updatedb - locate
+whatis
+whereis
+which
+type

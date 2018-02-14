@@ -1,0 +1,58 @@
+General stuff
+-------------
+- Linux is a kernel
+- distrowatch.com
+- less -> paging program
+
+=========================================
+Hardware settings
+------------
+lspci
+lspci -v -> verbose
+lspci -vv -> very verbose
+lsusb
+lsusb -v -> verbose
+lsblk
+major number -> the type of storage device
+scsi driver used for IDE, SATA etc drives
+
+/proc -> procfs - representation of the running processes, what kernel we are running
+/proc/devices -> what devices and drivers are loaded
+/proc/modules -> what kernel modules are loaded
+/sys -> sysfs - representation of the devices via loaded module/driver
+/sys/module/ -> what modules are loaded for every device
+/dev -> devfs - actual device files
+
+cold devices -> designed to be plugged in when the system is powered off
+hot devices -> can be detected by the system while it is running
+D-Bus/udev -> daemons used to detect hardware
+dmesg -> displays messages about hardware changes - reads from /dev/kmsg
+dmesg -C -> clear the buffer for hardware changes
+
+Hardware device drivers
+-------------
+lsmod -> list currently loaded drivers - reads from /proc/modules
+modprobe -r *driver* -> unload the driver and its dependencies
+modprobe -rv -> verbose
+
+
+
+
+
+Linux Boot Process
+-------------
+BIOS = POST -> boot loader -> OS
+GRUB -> GRand Unified Bootloader
+/boot -> contains the kernel, initial RAM disk and other files for the boot
+vmlinux -> normal kernel
+vmlinuz -> compressed kernel
+
+runlevels:
+0 -> shutdown
+1 -> single user mode - used for maintenance
+2-5 -> multi-user modes
+6 -> reboot
+telinit X
+systemctl isolate X.target
+
+
