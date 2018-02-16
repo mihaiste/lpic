@@ -113,3 +113,78 @@ swapon -s -> display info on the swap
 free -m -> display info on the RAM and swap usage - reads info from /proc/meminfo
 df -hT -> display file system disk usage
 
+=======================================
+Boot Managers
+----------
+- is located in the MBR (first 512 bytes of the disk)
+- the boot loader location is chosen during the installation
+MBR = 446 bytes (bootloader stored in assembly code) + 4 x 16 bytes (partition table for up to 4 primary partitions) + 2 bytes (Sentinel for the bootable flag = 0xAA55)
+dd if=/dev/sda of=/root/sda.mbr.bak count=1 bs=512 -> backup the MBR
+
+GRUB Legacy
+----------
+/boot/grub/menu.lst -> config file for GRUB Legacy
+/etc/grub.conf -> usually a symlink to the above
+- stanza = menu entry in grub
+- a stanza starts with the word title and the next one will start with the same word
+grub-install /dev/sda -> install GRUB in the MBR
+grub-install /dev/sda1 -> install GRUB in the first sector of the partition
+
+GRUB2
+----------
+/boot/grub/grub.cfg -> config file for GRUB2
+- the GRUB2 config file is usually generated rather than editing it
+grub-mkconfig -o /boot/grub/grub.cfg
+- edits are not made directly to grub.cfg
+/etc/default/grub
+/etc/grub.d
+
+Reset root password - RH
+----------
+- boot to the initialization ram disk
+- edit the linux16 entry
+- remove rhgb and quiet
+- add rd.break and enforcing=0
+- switch_root# mount -o remount,rw /sysroot
+- chroot /sysroot
+- passwd
+- exit
+- switch_root# mount -o remount,ro /sysroot
+- exit
+- restorecon /etc/shadow
+- setenforce 1
+
+Reset root password - Debian
+----------
+- edit the linux entry
+- add init=/bin/bash
+- mount -o remount,rw /
+- passwd
+- mount -o remount,ro /
+- reset
+
+=====================================
+Shared Libraries
+-----------
+ldd -> list what shared libraries are used by a program
+ldd -> list dependencies for a program
+ldd $(which command)
+ldconfig -> display the shared libraries from our system
+LD_LIBRARY_PATH -> variable containing where the libraries are located
+/etc/ld.so.conf
+/etc/ld.so.conf.d
+
+- code that other applications can use
+- shared libraries have the .so ending
+
+/lib
+/usr/lib
+/usr/local/lib
+
+Adding a shared library
+-----------
+- mkdir /usr/local/lib/new_folder_for_the_new_library
+- cp library.so !$
+- echo !$ > /etc/ld.so.conf.d/new_library.conf
+- ldconfig
+- ldconfig -p | grep new_library
