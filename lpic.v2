@@ -175,11 +175,21 @@ LD_LIBRARY_PATH -> variable containing where the libraries are located
 /etc/ld.so.conf.d
 
 - code that other applications can use
-- shared libraries have the .so ending
+- shared libraries have the .so ending (so = shared objects)
 
-/lib
-/usr/lib
+-> where are share libs located?
+- Trusted directories:
+	/lib
+	/usr/lib
+- we can read from paths specified in /etc/ld.so.conf
+- we can specify a path using
+	ldconfig -n <path>
+- use the LD_LIBRARY_PATH variable
+
 /usr/local/lib
+
+ldconfig -p -> display the library cache
+ldconfig -> rebuild the lib cache after adding a new lib
 
 Adding a shared library
 -----------
