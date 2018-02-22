@@ -274,3 +274,10 @@ yumdownloader --resolve -> also downloads the dependencies
 
 rpm2cpio zsh.rpm > zsh.cpio -> create the cpio archive
 cpio -id < zsh.cpio -> extract the files to the current folder
+
+=====================================
+CLI
+----------
+uname -a -> display more info about the OS
+uname -o -> display what OS we have
+
