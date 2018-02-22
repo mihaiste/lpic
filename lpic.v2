@@ -280,4 +280,37 @@ CLI
 ----------
 uname -a -> display more info about the OS
 uname -o -> display what OS we have
+type
+which
+$PATH -> contains the paths to folder where executables are located
+- internal command = shell builtin
+
+Internal vs external commands in RHEL/CentOS 7
+-----------
+- running pwd as a shell builtin -> pwd
+- running pwd as an external command -> cd /bin && ./pwd
+
+Environment variables
+----------
+- scope -> local (available for the current shell) or global (available for all shells)
+export VARIABLE -> makes variable available for all shells
+export VARIABLE=1
+unset VARIABLE -> delete the variable
+env -> display exported variables
+set -> display variables and functions
+set -o -> display shell options
+set -o allexport -> all variable are set as global by default
+set +o allexport -> turn off the above setting
+alias
+
+CLI History
+----------
+history -> display the current history - written in /home/user/.bash_history
+!101 -> will repeat the 101st command from history
+!b -> run the latest command that starts with a 'b'
+CTRL+r -> reverse search
+CTRL+r -> type something -> hit Enter to run
+CTRL+r -> type something -> CTRL+r to go to the next command that matches
+!$ -> last used argument
+HISTCONTROL=erasedups -> remove duplicates from the history
 
