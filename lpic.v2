@@ -198,3 +198,79 @@ Adding a shared library
 - echo !$ > /etc/ld.so.conf.d/new_library.conf
 - ldconfig
 - ldconfig -p | grep new_library
+
+=========================================
+Debian Package Management
+-----------
+dpkg -> the most basic command in managing software on Debian based systems
+dpkg -i -> install
+dpkg -r -> remove
+dpkg -P -> purge (remove the app and the file and the config files)
+dpkg --get-selections -> list what is installed
+dpkg -l 'vim*' -> list all packages that start with vim
+dpkg -S /bin/ls -> display to what package the file belongs
+dpkg -L -> list all the files that belong to the package
+dpkg-reconfigure -> re-run a config wizard
+
+Repositories
+-----------
+/etc/apt/sources.list -> file where repos are configured
+- aptitude -> can be run interactively
+- apt-get
+- apt-cache
+
+aptitude search 'zsh.*'
+aptitude search '~nzsh.*'
+aptitude install
+aptitude purge
+
+apt-get update -> update the local db about the info from the repos
+apt-cache search -> display basic info about the packege
+apt-cache show -> display detailed info about the package
+apt-get install
+apt-get purge 
+apt-get autoremove -> remove dependencies that are not used
+apt-get dist-upgrade
+
+==========================================
+RPM and YUM Package Management
+------------
+rpm -qa -> list all the installed apps
+rpm -i -> install
+rpm -qpi -> display info about the rpm package we want to install (package is not installed yet)
+rpm -qpl -> list everything included in the package
+rpm -iv -> install and show what is happening
+rpm -ivh -> also get a progress bar
+rpm -qi -> display info about an installed package
+rpm -U -> update a package - if the package is not installed, it will install it
+rpm -F -> only update if the package exists
+rpm -e -> remove
+rpm -K -> verify the signature of the rpm file
+rpm -qf -> display to which package a file belongs to
+rpm -ql -> list everything that belongs to a package
+rpm -V -> verify/check the integrity of the package
+rpm -Va -> verify/check the integrity of all packages
+rpm -qpR -> display the dependencies of a package
+
+Repositories
+-------------
+/etc/yum.conf -> config file for yum
+- repo locations can be configured in /etc/yum.repos.d/
+/etc/yum.repos.d/
+yum repolist -> display the configured repos
+yum install
+yum install -y -> install without being prompted to accept the changes
+yum update -> update package
+yum remove
+yum info -> display info about a package from the internet
+yum search
+yum list -> displays all the installed and available packages
+yum list installed -> display everything that is installed
+yum provides /etc/hosts.allow -> display to which package the file belongs
+
+yumdownloader -> comes from the yum-utils package
+yumdownloader --destdir -> sets the destination folder for the download
+yumdownloader --resolve -> also downloads the dependencies
+
+rpm2cpio zsh.rpm > zsh.cpio -> create the cpio archive
+cpio -id < zsh.cpio -> extract the files to the current folder
