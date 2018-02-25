@@ -405,3 +405,33 @@ find -newer -> useful with a baseline file
 find -empty -> empty files
 find -size +10M -> look for file with the size greated than 10MB
 
+Archiving
+---------
+tar -c -> create
+tar -v -> verbose
+tar -f -> destination file
+tar -t -> test
+tar -x -> expand/extract
+gzip file.tar -> zip up a tar file (also compress it)
+gunzip
+tar -z -> compress using gzip
+find /var/log -type f -mtime +1 | cpio -o > log.cpio
+cpio -id --no-absolute-filenames < file.cpio -> expand the cpio archive
+bzip2
+bunzip2
+tar -j -> compress using bzip2
+xz
+unxz
+tar -J -> compress using xz
+
+=======================================
+Streams, pipes and redirects
+----------
+< -> standard input
+> -> standard output
+1> -> standard output
+2> -> standard error
+>> -> append
+2>&1 -> redirect standard error to the same place as the standard output
+tee -> redirect standard output to a file and also to the screen
+
