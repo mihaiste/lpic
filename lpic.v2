@@ -314,3 +314,94 @@ CTRL+r -> type something -> CTRL+r to go to the next command that matches
 !$ -> last used argument
 HISTCONTROL=erasedups -> remove duplicates from the history
 
+==========================================
+Process text streams using filters
+----------
+cat
+cat -vet -> also display the hidden characters (non printable) from the file
+tac
+nl -> display output and also number the lines
+less
+head -> top 10 lines by default
+tail -> bottom 10 lines by default
+tail -f -> follow the file
+- in less use / to search forward and ? to search backward
+
+tabs X -> set the tabs to X spaces
+echo -e "file\twith\ttabs" -> \t means one tab
+expand file1 > file2 -> convert tabs to spaces
+unexpand -a file2 > file1 -> convert back to tabs
+od -> octal dump
+od -b -> octal bytes
+od -a -> display as text
+od -x -> display as hex
+
+fmt -> set the width of the output (75 charactes by default)
+pr -> format for printing with page numbers (66 line per page by default)
+uniq -> remove duplicates
+join file1 file2 -> joins related data together - by default join uses the first column as the unique data - the data needs to be presorted
+paste file1 file2 -> merges the data line by line
+
+sort -> by default sort based on the first character of each line
+sort -r -> reverse sort
+sort -t':' -n -k3 -> set the delimiter to : and sort based on the 3rd column
+wc -> display the number of lines, words and characters
+wc -l -> display the number of lines
+split -l 300 -> split a file to 300 lines
+
+tr -> translate
+tr [a-z] [A-Z] < file -> translate the lower case to upper case from the file
+tr -s -> suppress characters
+tr -s [:space:] -> suppress additional spaces
+
+sed -> stream editor
+sed 's/bash/sh' -> replace bash with sh
+sed 's/bash$/sh' -> replace bash from the end of the line with sh
+sed '/^#/d' -> delete commented lines
+cut -f1,3 -d':' file -> display fields 1 and 3 delimited by : from a file
+cut -f1 -d$'\t' file -> diplay field 1 delimited by a TAB from a file
+
+======================================
+File management
+----------
+-copy, rename, delete and archive
+cp, mv, rm
+cp -u -> copy only if the source is newer than the destination
+cp -i -> interactive mode - always ask if the file can be overwritten etc
+cp -a -> maintain permissions and ownerships of the source
+mv/rm -i -> interactive mode
+mv -n -> prevents the destination to be overwritten if it already exists
+
+File Globbing
+----------
+* -> 0 or more characters
+? -> exactly 1 character
+[Aa] -> A or a
+ls /dev/sd[ab]?
+
+ls -a -> list all
+ls -A -> list almost all - excludes the . and .. directories
+ls -lha
+ls -ltr -> reverse sort listing on the timestamp
+ls -R -> recursive
+ls -ld -> long listing on a directory
+
+cp -R -> recursive
+mkdir -p -> create parent directory structure
+mkdir -m 700 -> create a directory and set the default permissions to 700
+rmdir -> can only be used if the folder is empty
+rm -rf
+
+touch
+touch -a -> change the access time 
+touch -m -> change the modified time
+stat -> display multiple details about a file
+file -> display what type of file we have
+find -type f -> look for files
+find -type d -> look for folders
+find -mmin 5 -> look for files modified in the last 5 minutes
+find -mtime 0 -> look for files modified in the last 24h
+find -newer -> useful with a baseline file
+find -empty -> empty files
+find -size +10M -> look for file with the size greated than 10MB
+
