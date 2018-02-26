@@ -521,3 +521,11 @@ grep -v -> won't display matches of the regular expressions
 ^\s*# -> lines that start with a whitespace or are commented
 
 sed -i.bak '/^\s*#/d;/^$/d' -> delete commented and empty lines
+
+=================================================
+VIM
+---------
+vimtutor
+:q -> exit
+:q! -> force exit
+
