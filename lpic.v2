@@ -435,3 +435,89 @@ Streams, pipes and redirects
 2>&1 -> redirect standard error to the same place as the standard output
 tee -> redirect standard output to a file and also to the screen
 
+=======================================
+Processes
+----------
+& -> run process in the background
+bg -> start a stopped process in the background
+
+Screen
+----------
+screen sleep 100 -> create a new screen where sleep will run
+CTRL+A+D -> detach the screen and return to the previous
+screen -ls -> list screens
+screen -r ID -> re-attach screen
+
+chmod u+s $(which screen) -> set SUID in order to share screen
+chmod 755 /var/run/screen -> ensure correct permissions
+screen -S *name* -> start screen with easy name
+CTRL+A - :multiuser on -> configure setting for multiple users
+CTRL+A - :acladd *user* -> configure ACL
+screen -x *user that set up the screen*/*name of the screen* -> connect to screen
+
+nohup *command* -> allow the command to run also after log out
+ps -l -> long listing for the processes from the current shell
+ps -f -> full listing for the processes from the current shell
+ps -elf -> list all processes that run on the system
+pgrep
+pkill -> terminate the processes
+killall -u *user* -> terminate all processes for a user
+
+kill -l -> list all the signals
+kill -15 | -term | -sigterm
+kill -9 | -kill | -sigkill
+
+top -> sort by CPU usage by default
+- press f to toggle the columns from top
+- press s to sort the current sort field
+top -p PID -> display on the info for the selected PID
+- press k to kill the selected process
+uptime
+free
+
+=============================================
+Process execution priority
+-----------
+nice -> display the default niceness (how much CPU time the application is going to take from the CPU)
+ps -l -> look for the NI column in order to view the niceness
+-20 to 19 -> values for the niceness
+niceness 0 -> default niceness
+niceness 19 -> the apps will take the least CPU time - lowest priority
+niceness -20 -> the apps will take the most CPU time - highest priority
+
+nice -n 5 *command* -> set the niceness to 5 for the command
+renice -n 15 -p PID -> set the niceness to a higher value - lower priority
+renice -n -5 -p PID -> set the niceness to a lower value - higher priority - only root can do it
+top
+- press r for renice
+
+============================================
+Search text files using regular expressions
+-----------
+grep
+egrep = grep -E -> enhanced regular expressions
+fgrep = grep -F
+sed
+
+^ -> beginning of the line
+$ -> end of the line
+[A-Za-z] -> any letter, uppercase or lowercase
+[0-9] -> any digit
+[a-z_] -> any lowercase letter or underscore
+[349] -> 3, 4 or 9
+\s -> whitespace (tab, space, eol character, new line character)
+\S -> non-whitespace
+\b -> word boundary (spaces, eol, hyphen etc)
+\B -> non-word boundary
+u* -> will match u for 0 or more times
+u? -> will match u 0 or once - optional character
+u+ -> will match one or more occurences of u
+u{3} -> will match exactly 3 occurences - need to use grep -E
+
+\ssystem -> will match 'file system'
+\bsystem -> will match 'file system' and 'file-system'
+
+grep -v -> won't display matches of the regular expressions
+^\s*# -> lines that start with a whitespace or are commented
+
+sed -i.bak '/^\s*#/d;/^$/d' -> delete commented and empty lines
