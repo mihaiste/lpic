@@ -526,6 +526,88 @@ sed -i.bak '/^\s*#/d;/^$/d' -> delete commented and empty lines
 VIM
 ---------
 vimtutor
-:q -> exit
-:q! -> force exit
+ESC :q -> exit
+ESC :q! -> force exit
+k -> up
+j -> down
+h -> left
+l -> right
+/*text* -> search forward
+?*text* -> search backwards
 
+3 modes in vim:
+- command
+- edit
+- lastline (using :)
+
+command mode:
+i -> insert text before the current character
+I -> insert text at the beginning of the current line
+a -> append after the current character
+A -> append after the current line
+o -> insert a new line below the current one
+O -> insert a new line above the current one
+u -> undo
+
+d for delete
+dw -> delete to the end of the current word
+3dw -> delete 3 words
+d0 -> delete up to the start of the line
+d$ -> delete to the end of the line
+dG -> delete to the end of the document
+dd -> delete current line
+
+y (yank) for copy
+yw -> copy current word
+yy -> copy current line
+
+c (clear) for cut
+cw -> cuts current word
+
+p -> paste deleted/copied text starting from the current position
+P -> paste at the beginning of the line
+
+lastline mode
+:w -> save
+:wq -> save and exit
+:x -> save and exit
+:e -> revert to last saved version
+:wq! -> force save and exit
+:q! -> quit without saving
+ZZ -> save and exit
+
+============================================
+Partitions and File Systems
+----------
+MBR:
+- maximum size of 2TB per partition
+- maximum 4 primary partitions (out of which 1 can be an extended partition)
+- Linux limits up to 15 partitions for SCSI devices
+
+GPT:
+- maximum size of 8ZB per partition
+- maximum 128 primary partitions
+- same limitation from Linux for SCSI devices
+
+File Systems: ext2, ext3, ext4, ReiserFS, XFS, Btrfs etc
+
+fdisk -> create partitions with MBR
+parted -> create partitions with MBR/GPT
+gdisk -> create partitions with GPT
+
+fdisk /dev/sdX -> start an interactive session for creating partitions
+fdisk -l /dev/sdX -> check the partition table for sdX
+
+mkfs -t ext4 /dev/sdXY -> create an ext4 file system on the sdXY partition
+mkfs.ext4 /dev/sdXY
+mke2fs -t ext4 /dev/sdXY
+mkswap /dev/sdXY -> create swap partition
+
+mkfs -t vfat /dev/sdXY -> create a VFAT file systems for removable devices
+mkfs.vfat /dev/sdXY
+mkdosfs /dev/sdXY
+
+xfsprogs -> for mkfs.xfs
+mkfs.xfs /dev/sdXY
+mkfs.xfs -f /dev/sdXY -> force create a XFS file system
+mkswap /dev/sdXY -> create swap space
