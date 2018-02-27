@@ -1,0 +1,613 @@
+General stuff
+-------------
+- Linux is a kernel
+- distrowatch.com
+- less -> paging program
+
+=========================================
+Hardware settings
+------------
+lspci
+lspci -v -> verbose
+lspci -vv -> very verbose
+lsusb
+lsusb -v -> verbose
+lsblk
+major number -> the type of storage device
+scsi driver used for IDE, SATA etc drives
+
+/proc -> procfs - representation of the running processes, what kernel we are running
+/proc/devices -> what devices and drivers are loaded
+/proc/modules -> what kernel modules are loaded
+/sys -> sysfs - representation of the devices via loaded module/driver
+/sys/module/ -> what modules are loaded for every device
+/dev -> devfs - actual device files
+
+cold devices -> designed to be plugged in when the system is powered off
+hot devices -> can be detected by the system while it is running
+D-Bus/udev -> daemons used to detect hardware
+dmesg -> displays messages about hardware changes - reads from /dev/kmsg
+dmesg -C -> clear the buffer for hardware changes
+
+Hardware device drivers
+-------------
+lsmod -> list currently loaded drivers - reads from /proc/modules
+modprobe -r *driver* -> unload the driver and its dependencies - rmmod is used in the background
+modprobe -rv -> verbose
+modprobe *driver* -> load the driver and it dependencies - insmod is used in the background
+/sys/module/*module_name*/parameters/ -> loaded module options
+/etc/modprobe.d/modesetting.conf -> set module options to be used when loading
+
+==================================================
+Linux Boot Process
+-------------
+boot = POST -> locate boot loader -> load boot loader -> load kernel -> start other services
+GRUB -> GRand Unified Bootloader
+/boot -> contains the kernel, initial RAM disk and other files for the boot
+vmlinux -> normal kernel
+vmlinuz -> compressed kernel
+/proc/cmdline -> parameters passed through to the kernel for the booting process
+
+System and startup managers:
+SysVinit -> used in earlier Debian and RH distros - serial boot process
+Upstart -> developed by Ubuntu
+systemd -> the latest - start services in paralel
+
+top -p X -> display only the process for PID X
+
+systemd-analyze -> display the boot time
+systemd-analyze blame -> display a list of all running units ordered by the time they took to initialize
+
+Kernel Ring Buffer Messages
+---------------
+dmesg -> reads from /dev/ksmg
+dmesg -> also logs can be found in /var/log/dmesg or boot.msg
+dmesg -C -> clear the ring buffer
+dmesg -c -> display and clear the ring buffer
+dmesg -w -> follows the ring buffer - good for monitoring
+dmesg -H -> displays in human readable format
+
+================================================
+Runlevels
+--------------
+SysVinit:
+0 -> shutdown
+1/S -> single user mode - used for maintenance
+2-5 -> multi-user modes
+6 -> reboot
+/etc/inittab -> set the default runlevel in this file - only for SysVinit
+/etc/rcX.d -> the default enabled/disabled services for the X runlevel
+chkconfig *service* on/off -> enable/disable the service - removes the symlink from the current runlevel directory /etc/rcX.d
+telinit X -> change the runlevel to X
+who -r = runlevel -> display the current runlevel
+
+systemd
+-------------
+poweroff.target -> runlevel 0
+rescue.target -> runlevel 1
+multiuser.target -> runleves 2,3,4
+graphical.target -> runlevel 5
+reboot.target -> runlevel 6
+
+systemctl get-default -> display the default runlevel
+systemctl set-default X -> set the default runlevel
+systemctl disable/enable X.service -> enable/disable a service
+systemctl isolate X.target -> change the runlevel to X
+who -r = runlevel
+
+shutdown/reboot
+-------------
+shutdown -h now -> halt
+shutdown -r now -> reboot
+shutdown -h +10 -> shutdown in 10 minutes
+shutdown -h +10 "shutting down in 10" -> displays message and halts in 10 min
+shutdown -c -> cancel shutdown operation
+echo "message" | wall -> displays the message to all the users
+
+========================================
+Hard disk layout
+----------
+- no drive letter, Linux uses mount points
+/ -> root file system
+swapon -s -> display info on the swap
+free -m -> display info on the RAM and swap usage - reads info from /proc/meminfo
+df -hT -> display file system disk usage
+
+=======================================
+Boot Managers
+----------
+- is located in the MBR (first 512 bytes of the disk)
+- the boot loader location is chosen during the installation
+MBR = 446 bytes (bootloader stored in assembly code) + 4 x 16 bytes (partition table for up to 4 primary partitions) + 2 bytes (Sentinel for the bootable flag = 0xAA55)
+dd if=/dev/sda of=/root/sda.mbr.bak count=1 bs=512 -> backup the MBR
+
+GRUB Legacy
+----------
+/boot/grub/menu.lst -> config file for GRUB Legacy
+/etc/grub.conf -> usually a symlink to the above
+- stanza = menu entry in grub
+- a stanza starts with the word title and the next one will start with the same word
+grub-install /dev/sda -> install GRUB in the MBR
+grub-install /dev/sda1 -> install GRUB in the first sector of the partition
+
+GRUB2
+----------
+/boot/grub/grub.cfg -> config file for GRUB2
+- the GRUB2 config file is usually generated rather than editing it
+grub-mkconfig -o /boot/grub/grub.cfg
+- edits are not made directly to grub.cfg
+/etc/default/grub
+/etc/grub.d
+
+Reset root password - RH
+----------
+- boot to the initialization ram disk
+- edit the linux16 entry
+- remove rhgb and quiet
+- add rd.break and enforcing=0
+- switch_root# mount -o remount,rw /sysroot
+- chroot /sysroot
+- passwd
+- exit
+- switch_root# mount -o remount,ro /sysroot
+- exit
+- restorecon /etc/shadow
+- setenforce 1
+
+Reset root password - Debian
+----------
+- edit the linux entry
+- add init=/bin/bash
+- mount -o remount,rw /
+- passwd
+- mount -o remount,ro /
+- reset
+
+=====================================
+Shared Libraries
+-----------
+ldd -> list what shared libraries are used by a program
+ldd -> list dependencies for a program
+ldd $(which command)
+ldconfig -> display the shared libraries from our system
+LD_LIBRARY_PATH -> variable containing where the libraries are located
+/etc/ld.so.conf
+/etc/ld.so.conf.d
+
+- code that other applications can use
+- shared libraries have the .so ending (so = shared objects)
+
+-> where are share libs located?
+- Trusted directories:
+	/lib
+	/usr/lib
+- we can read from paths specified in /etc/ld.so.conf
+- we can specify a path using
+	ldconfig -n <path>
+- use the LD_LIBRARY_PATH variable
+
+/usr/local/lib
+
+ldconfig -p -> display the library cache
+ldconfig -> rebuild the lib cache after adding a new lib
+
+Adding a shared library
+-----------
+- mkdir /usr/local/lib/new_folder_for_the_new_library
+- cp library.so !$
+- echo !$ > /etc/ld.so.conf.d/new_library.conf
+- ldconfig
+- ldconfig -p | grep new_library
+
+=========================================
+Debian Package Management
+-----------
+dpkg -> the most basic command in managing software on Debian based systems
+dpkg -i -> install
+dpkg -r -> remove
+dpkg -P -> purge (remove the app and the file and the config files)
+dpkg --get-selections -> list what is installed
+dpkg -l 'vim*' -> list all packages that start with vim
+dpkg -S /bin/ls -> display to what package the file belongs
+dpkg -L -> list all the files that belong to the package
+dpkg-reconfigure -> re-run a config wizard
+
+Repositories
+-----------
+/etc/apt/sources.list -> file where repos are configured
+- aptitude -> can be run interactively
+- apt-get
+- apt-cache
+
+aptitude search 'zsh.*'
+aptitude search '~nzsh.*'
+aptitude install
+aptitude purge
+
+apt-get update -> update the local db about the info from the repos
+apt-cache search -> display basic info about the packege
+apt-cache show -> display detailed info about the package
+apt-get install
+apt-get purge 
+apt-get autoremove -> remove dependencies that are not used
+apt-get dist-upgrade
+
+==========================================
+RPM and YUM Package Management
+------------
+rpm -qa -> list all the installed apps
+rpm -i -> install
+rpm -qpi -> display info about the rpm package we want to install (package is not installed yet)
+rpm -qpl -> list everything included in the package
+rpm -iv -> install and show what is happening
+rpm -ivh -> also get a progress bar
+rpm -qi -> display info about an installed package
+rpm -U -> update a package - if the package is not installed, it will install it
+rpm -F -> only update if the package exists
+rpm -e -> remove
+rpm -K -> verify the signature of the rpm file
+rpm -qf -> display to which package a file belongs to
+rpm -ql -> list everything that belongs to a package
+rpm -V -> verify/check the integrity of the package
+rpm -Va -> verify/check the integrity of all packages
+rpm -qpR -> display the dependencies of a package
+
+Repositories
+-------------
+/etc/yum.conf -> config file for yum
+- repo locations can be configured in /etc/yum.repos.d/
+/etc/yum.repos.d/
+yum repolist -> display the configured repos
+yum install
+yum install -y -> install without being prompted to accept the changes
+yum update -> update package
+yum remove
+yum info -> display info about a package from the internet
+yum search
+yum list -> displays all the installed and available packages
+yum list installed -> display everything that is installed
+yum provides /etc/hosts.allow -> display to which package the file belongs
+
+yumdownloader -> comes from the yum-utils package
+yumdownloader --destdir -> sets the destination folder for the download
+yumdownloader --resolve -> also downloads the dependencies
+
+rpm2cpio zsh.rpm > zsh.cpio -> create the cpio archive
+cpio -id < zsh.cpio -> extract the files to the current folder
+
+=====================================
+CLI
+----------
+uname -a -> display more info about the OS
+uname -o -> display what OS we have
+type
+which
+$PATH -> contains the paths to folder where executables are located
+- internal command = shell builtin
+
+Internal vs external commands in RHEL/CentOS 7
+-----------
+- running pwd as a shell builtin -> pwd
+- running pwd as an external command -> cd /bin && ./pwd
+
+Environment variables
+----------
+- scope -> local (available for the current shell) or global (available for all shells)
+export VARIABLE -> makes variable available for all shells
+export VARIABLE=1
+unset VARIABLE -> delete the variable
+env -> display exported variables
+set -> display variables and functions
+set -o -> display shell options
+set -o allexport -> all variable are set as global by default
+set +o allexport -> turn off the above setting
+alias
+
+CLI History
+----------
+history -> display the current history - written in /home/user/.bash_history
+!101 -> will repeat the 101st command from history
+!b -> run the latest command that starts with a 'b'
+CTRL+r -> reverse search
+CTRL+r -> type something -> hit Enter to run
+CTRL+r -> type something -> CTRL+r to go to the next command that matches
+!$ -> last used argument
+HISTCONTROL=erasedups -> remove duplicates from the history
+
+==========================================
+Process text streams using filters
+----------
+cat
+cat -vet -> also display the hidden characters (non printable) from the file
+tac
+nl -> display output and also number the lines
+less
+head -> top 10 lines by default
+tail -> bottom 10 lines by default
+tail -f -> follow the file
+- in less use / to search forward and ? to search backward
+
+tabs X -> set the tabs to X spaces
+echo -e "file\twith\ttabs" -> \t means one tab
+expand file1 > file2 -> convert tabs to spaces
+unexpand -a file2 > file1 -> convert back to tabs
+od -> octal dump
+od -b -> octal bytes
+od -a -> display as text
+od -x -> display as hex
+
+fmt -> set the width of the output (75 charactes by default)
+pr -> format for printing with page numbers (66 line per page by default)
+uniq -> remove duplicates
+join file1 file2 -> joins related data together - by default join uses the first column as the unique data - the data needs to be presorted
+paste file1 file2 -> merges the data line by line
+
+sort -> by default sort based on the first character of each line
+sort -r -> reverse sort
+sort -t':' -n -k3 -> set the delimiter to : and sort based on the 3rd column
+wc -> display the number of lines, words and characters
+wc -l -> display the number of lines
+split -l 300 -> split a file to 300 lines
+
+tr -> translate
+tr [a-z] [A-Z] < file -> translate the lower case to upper case from the file
+tr -s -> suppress characters
+tr -s [:space:] -> suppress additional spaces
+
+sed -> stream editor
+sed 's/bash/sh' -> replace bash with sh
+sed 's/bash$/sh' -> replace bash from the end of the line with sh
+sed '/^#/d' -> delete commented lines
+cut -f1,3 -d':' file -> display fields 1 and 3 delimited by : from a file
+cut -f1 -d$'\t' file -> diplay field 1 delimited by a TAB from a file
+
+======================================
+File management
+----------
+-copy, rename, delete and archive
+cp, mv, rm
+cp -u -> copy only if the source is newer than the destination
+cp -i -> interactive mode - always ask if the file can be overwritten etc
+cp -a -> maintain permissions and ownerships of the source
+mv/rm -i -> interactive mode
+mv -n -> prevents the destination to be overwritten if it already exists
+
+File Globbing
+----------
+* -> 0 or more characters
+? -> exactly 1 character
+[Aa] -> A or a
+ls /dev/sd[ab]?
+
+ls -a -> list all
+ls -A -> list almost all - excludes the . and .. directories
+ls -lha
+ls -ltr -> reverse sort listing on the timestamp
+ls -R -> recursive
+ls -ld -> long listing on a directory
+
+cp -R -> recursive
+mkdir -p -> create parent directory structure
+mkdir -m 700 -> create a directory and set the default permissions to 700
+rmdir -> can only be used if the folder is empty
+rm -rf
+
+touch
+touch -a -> change the access time 
+touch -m -> change the modified time
+stat -> display multiple details about a file
+file -> display what type of file we have
+find -type f -> look for files
+find -type d -> look for folders
+find -mmin 5 -> look for files modified in the last 5 minutes
+find -mtime 0 -> look for files modified in the last 24h
+find -newer -> useful with a baseline file
+find -empty -> empty files
+find -size +10M -> look for file with the size greated than 10MB
+
+Archiving
+---------
+tar -c -> create
+tar -v -> verbose
+tar -f -> destination file
+tar -t -> test
+tar -x -> expand/extract
+gzip file.tar -> zip up a tar file (also compress it)
+gunzip
+tar -z -> compress using gzip
+find /var/log -type f -mtime +1 | cpio -o > log.cpio
+cpio -id --no-absolute-filenames < file.cpio -> expand the cpio archive
+bzip2
+bunzip2
+tar -j -> compress using bzip2
+xz
+unxz
+tar -J -> compress using xz
+
+=======================================
+Streams, pipes and redirects
+----------
+< -> standard input
+> -> standard output
+1> -> standard output
+2> -> standard error
+>> -> append
+2>&1 -> redirect standard error to the same place as the standard output
+tee -> redirect standard output to a file and also to the screen
+
+=======================================
+Processes
+----------
+& -> run process in the background
+bg -> start a stopped process in the background
+
+Screen
+----------
+screen sleep 100 -> create a new screen where sleep will run
+CTRL+A+D -> detach the screen and return to the previous
+screen -ls -> list screens
+screen -r ID -> re-attach screen
+
+chmod u+s $(which screen) -> set SUID in order to share screen
+chmod 755 /var/run/screen -> ensure correct permissions
+screen -S *name* -> start screen with easy name
+CTRL+A - :multiuser on -> configure setting for multiple users
+CTRL+A - :acladd *user* -> configure ACL
+screen -x *user that set up the screen*/*name of the screen* -> connect to screen
+
+nohup *command* -> allow the command to run also after log out
+ps -l -> long listing for the processes from the current shell
+ps -f -> full listing for the processes from the current shell
+ps -elf -> list all processes that run on the system
+pgrep
+pkill -> terminate the processes
+killall -u *user* -> terminate all processes for a user
+
+kill -l -> list all the signals
+kill -15 | -term | -sigterm
+kill -9 | -kill | -sigkill
+
+top -> sort by CPU usage by default
+- press f to toggle the columns from top
+- press s to sort the current sort field
+top -p PID -> display on the info for the selected PID
+- press k to kill the selected process
+uptime
+free
+
+=============================================
+Process execution priority
+-----------
+nice -> display the default niceness (how much CPU time the application is going to take from the CPU)
+ps -l -> look for the NI column in order to view the niceness
+-20 to 19 -> values for the niceness
+niceness 0 -> default niceness
+niceness 19 -> the apps will take the least CPU time - lowest priority
+niceness -20 -> the apps will take the most CPU time - highest priority
+
+nice -n 5 *command* -> set the niceness to 5 for the command
+renice -n 15 -p PID -> set the niceness to a higher value - lower priority
+renice -n -5 -p PID -> set the niceness to a lower value - higher priority - only root can do it
+top
+- press r for renice
+
+============================================
+Search text files using regular expressions
+-----------
+grep
+egrep = grep -E -> enhanced regular expressions
+fgrep = grep -F
+sed
+
+^ -> beginning of the line
+$ -> end of the line
+[A-Za-z] -> any letter, uppercase or lowercase
+[0-9] -> any digit
+[a-z_] -> any lowercase letter or underscore
+[349] -> 3, 4 or 9
+\s -> whitespace (tab, space, eol character, new line character)
+\S -> non-whitespace
+\b -> word boundary (spaces, eol, hyphen etc)
+\B -> non-word boundary
+u* -> will match u for 0 or more times
+u? -> will match u 0 or once - optional character
+u+ -> will match one or more occurences of u
+u{3} -> will match exactly 3 occurences - need to use grep -E
+
+\ssystem -> will match 'file system'
+\bsystem -> will match 'file system' and 'file-system'
+
+grep -v -> won't display matches of the regular expressions
+^\s*# -> lines that start with a whitespace or are commented
+
+sed -i.bak '/^\s*#/d;/^$/d' -> delete commented and empty lines
+
+=================================================
+VIM
+---------
+vimtutor
+ESC :q -> exit
+ESC :q! -> force exit
+k -> up
+j -> down
+h -> left
+l -> right
+/*text* -> search forward
+?*text* -> search backwards
+
+3 modes in vim:
+- command
+- edit
+- lastline (using :)
+
+command mode:
+i -> insert text before the current character
+I -> insert text at the beginning of the current line
+a -> append after the current character
+A -> append after the current line
+o -> insert a new line below the current one
+O -> insert a new line above the current one
+u -> undo
+
+d for delete
+dw -> delete to the end of the current word
+3dw -> delete 3 words
+d0 -> delete up to the start of the line
+d$ -> delete to the end of the line
+dG -> delete to the end of the document
+dd -> delete current line
+
+y (yank) for copy
+yw -> copy current word
+yy -> copy current line
+
+c (clear) for cut
+cw -> cuts current word
+
+p -> paste deleted/copied text starting from the current position
+P -> paste at the beginning of the line
+
+lastline mode
+:w -> save
+:wq -> save and exit
+:x -> save and exit
+:e -> revert to last saved version
+:wq! -> force save and exit
+:q! -> quit without saving
+ZZ -> save and exit
+
+============================================
+Partitions and File Systems
+----------
+MBR:
+- maximum size of 2TB per partition
+- maximum 4 primary partitions (out of which 1 can be an extended partition)
+- Linux limits up to 15 partitions for SCSI devices
+
+GPT:
+- maximum size of 8ZB per partition
+- maximum 128 primary partitions
+- same limitation from Linux for SCSI devices
+
+File Systems: ext2, ext3, ext4, ReiserFS, XFS, Btrfs etc
+
+fdisk -> create partitions with MBR
+parted -> create partitions with MBR/GPT
+gdisk -> create partitions with GPT
+
+fdisk /dev/sdX -> start an interactive session for creating partitions
+fdisk -l /dev/sdX -> check the partition table for sdX
+
+mkfs -t ext4 /dev/sdXY -> create an ext4 file system on the sdXY partition
+mkfs.ext4 /dev/sdXY
+mke2fs -t ext4 /dev/sdXY
+mkswap /dev/sdXY -> create swap partition
+
+mkfs -t vfat /dev/sdXY -> create a VFAT file systems for removable devices
+mkfs.vfat /dev/sdXY
+mkdosfs /dev/sdXY
+
+xfsprogs -> for mkfs.xfs
+mkfs.xfs /dev/sdXY
+mkfs.xfs -f /dev/sdXY -> force create a XFS file system
+mkswap /dev/sdXY -> create swap space
