@@ -547,6 +547,7 @@ a -> append after the current character
 A -> append after the current line
 o -> insert a new line below the current one
 O -> insert a new line above the current one
+G -> navigate to the last line
 u -> undo
 
 d for delete
@@ -611,3 +612,95 @@ xfsprogs -> for mkfs.xfs
 mkfs.xfs /dev/sdXY
 mkfs.xfs -f /dev/sdXY -> force create a XFS file system
 mkswap /dev/sdXY -> create swap space
+
+====================================
+Maintaining the integrity of the file systems
+----------
+fsck /dev/sdXY -> check and repair file system inconsistencies
+fsck -> file systems should not be mounted before starting fsck
+fsck -> is calling other utilities for checking the file systems:
+	- e2fsck for ext2
+	- xfs_repair for xfs
+	- btrfsck for btrfs
+fsck -A -> check all file systems from fstab with fsckpass>0
+fsck -AR -> as above, but exclude root file system
+fsck -ARM -> as above, but exclude all mounted file systems
+fsck -f /dev/sdXY -> force a full check even if a file system was marked as clean
+
+xfs_check
+xfs_repair /dev/sdXY -> check and repair
+xfs_repair -n /dev/sdXY -> just check the file system
+
+df -T -> display file system type
+df -h -> display disk space info
+df -i -> display inode utilization
+du -sh /home -> display the size of the folder - summary
+du -h /home -> display size of each file
+
+btrfsck /dev/sdXY -> for BTR file systems
+
+display file system metadata:
+- tune2fs for ext
+- dumpe2fs for ext
+- xfs_info for xfs
+- xfs_metadump is more detailed than xfs_info
+
+debugfs
+tune2fs -l /dev/sdXY -> display metadata
+dumpe2fs /dev/sdXY -> display detailed metadata
+xfs_info /dev/sdXY
+/etc/mke2fs.conf -> config file for mke2fs
+
+=============================================
+Mounting and Unmounting
+-----------
+mount
+umount /*mount point*
+
+mount -o *options* /dev/sdXY /*mount point*
+- options:
+rw
+noatime -> don't maintain the access time
+usrquota -> set user quotas
+
+blkid /dev/sdXY -> get the UUID of the partition
+- get UUID from vim:
+:r!blkid /dev/sdXY
+
+/etc/mtab -> file containing current mounts - info comes from /proc/mounts
+/etc/fstab -> config file for mounts
+
+swapon -s -> display swap partitions
+swapon -a -> mount the swap partitions
+
+/dev/cdrom /media/cdrom iso9660 ro,user,noauto 0 0 -> mount config in fstab for cdrom
+
+===============================================
+Manage disk quotas
+----------
+- quotas are applied to a file system as a mount option
+- we can apply quotas to a user or to a group
+
+apt-get install quota
+yum install quota
+
+who -> check who is loggen on
+/etc/nologin -> when created, other users cannot login
+
+rsync -arv /folder1/ /folder2 -> copy contents
+-a -> archive, mainain ownerships etc
+-r -> recursive
+-v -> verbose
+
+Quotas
+---------
+quotacheck -cmu /dev/sdXY -> create the quota database
+-c -> create
+-m -> mount
+-u -> user
+quotaon /dev/sdXY -> turn on quota checking
+setquota -u *user* 100000 150000 0 0 /dev/sdXY -> set quota for the user to a soft limit of 100MB (needs to be in 1K blocks) and a hard limit of 150MB and no inode limits
+edquota *user* -> interactive form
+repquota -au /dev/sdXY -> show quota usage
+edquota -p *user1* -u *user2* -> use user1 as prototype and copy details to user2
+
