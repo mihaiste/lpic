@@ -704,3 +704,91 @@ edquota *user* -> interactive form
 repquota -au /dev/sdXY -> show quota usage
 edquota -p *user1* -u *user2* -> use user1 as prototype and copy details to user2
 
+===========================================
+Permissions and Ownership
+---------
+default permissions:
+- 666 for files
+- 777 for folders
+
+umask -> set default permissions by removing them
+0 or - -> no permissions
+4 or r -> read
+2 or w -> write
+1 or x -> execute
+
+newgrp -> toggle between groups to set the primary group - need to exit after finishing
+chmod
+- we need execute permissions in order to enter a folder
+
+stat -> display all properties of the file
+stat -c %A -> display symbolic permissions (rwx)
+stat -c %a -> display octal permissions (644)
+stat -c %G -> display GID name
+stat -c %g -> display GID number
+
+chown user file
+chown user:group file
+chgrp group file
+
+Special permissions
+-----------
+- set user ID bit
+- set group ID bit
+- sticky bit
+
+- sticky bit - when set on a folder, you can only delete the files you own - indicated by the lowercase t
+- uppercase T indicates that the execute permission is not set for others
+chmod o+t folder
+chmod 1777 folder
+
+- set group ID bit - set on executable -> the executable runs with the group ID of the owner group
+- when set on a folder -> all new files are going to be group owned by the group owner of the folder
+chmod 2777 folder -> set group ID bit
+chmod 3777 folder -> set group ID bit + sticky bit
+
+- set user ID bit - set on executable -> the executable runs with the UID of th owner of the file
+chmod u+s file
+chmod 4777 file
+find /usr/bin/ -perm -u+s -> find executables with SUID bit
+
+==============================================
+Hard links
+---------
+- a hard link is a file with a hard link count greater than 1
+- folders have a hard link count greater than 2: the . (dot) folder and the .. (2 dots) folder
+ln source destination
+
+Symbolic (soft) links
+---------
+ln -s source destination
+find / -type l -xtype l -> look for broken links
+
+==============================================
+System files and their correct location
+---------
+FHS -> File system Hierachical Standard:
+- shareable and static directories - accessible to all users, but not usually written to - often programs or documentation
+/usr, /opt etc
+- shareable and variable folders - shared folders that will be written to by users
+/var/mail, /var/spool/cups
+- unshareable and static folders - config and boot folders
+/etc, /boot
+- unshareable and variable folders - will be written to by root or services
+/var/run, /var/lock
+
+Finding files
+---------
+find -name 'file*' -type f -> the AND between the 2 conditions is implicit
+find -name 'file*' -o -type f -> -o for OR
+find -type f NOT -iname 'file*' -> find files that don't have 'file' in their name
+
+locate -> search indexed DB
+updatedb -> cron job or command to update the DB for locate
+/etc/updatedb.conf
+- Debian systems have mlocate
+
+whatis command -> display info about the command
+whereis command -> display where the program and the documentation are located
+which command -> display where the program is located
+type command -> display the type of the command (aliased, builtin)
